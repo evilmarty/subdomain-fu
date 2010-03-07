@@ -37,7 +37,7 @@ module SubdomainFu
   end
   
   def self.tld_for(request)
-    tld_rules[request.host] || tld_size
+    tld_rules[current_domain(request)] || tld_size
   end
 
   # Is the current subdomain either nil or not a mirror?
