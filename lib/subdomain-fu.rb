@@ -22,6 +22,9 @@ module SubdomainFu
 
   mattr_accessor :override_only_path
   @@override_only_path = false
+  
+  mattr_accessor :tld_rules
+  @@tld_rules = {}
 
   # Returns the TLD Size of the current environment.
   def self.tld_size
@@ -31,6 +34,10 @@ module SubdomainFu
   # Sets the TLD Size of the current environment
   def self.tld_size=(value)
     tld_sizes[RAILS_ENV.to_sym] = value
+  end
+  
+  def self.tld_for(request)
+    tld_rules[request.host] || tld_size
   end
 
   # Is the current subdomain either nil or not a mirror?
@@ -129,7 +136,7 @@ module SubdomainFu
   end
 
   def self.current_subdomain(request)
-    subdomain = request.subdomains(SubdomainFu.tld_size).join(".")
+    subdomain = request.subdomains(SubdomainFu.tld_for(request)).join(".")
     if has_subdomain?(subdomain)
       subdomain
     else
