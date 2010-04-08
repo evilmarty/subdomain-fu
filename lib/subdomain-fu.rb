@@ -23,8 +23,8 @@ module SubdomainFu
   mattr_accessor :override_only_path
   @@override_only_path = false
   
-  mattr_accessor :tld_rules
-  @@tld_rules = {}
+  mattr_accessor :tld_mappings
+  @@tld_mappings = []
 
   # Returns the TLD Size of the current environment.
   def self.tld_size
@@ -36,8 +36,12 @@ module SubdomainFu
     tld_sizes[RAILS_ENV.to_sym] = value
   end
   
-  def self.tld_for(request)
-    tld_rules[current_domain(request)] || tld_size
+  def self.tld_for(host)
+    if tld_mappings.include? host
+      host.split('.').length
+    else
+      tld_size
+    end
   end
 
   # Is the current subdomain either nil or not a mirror?
@@ -146,9 +150,7 @@ module SubdomainFu
 
   #Enables subdomain-fu to more completely replace DHH's account_location plugin
   def self.current_domain(request)
-    domain = ""
-    domain << request.subdomains[1..-1].join(".") + "." if request.subdomains.length > 1
-    domain << request.domain + request.port_string
+    request.domain(tld_for(request.domain)) + request.port_string
   end
 
   module Controller
