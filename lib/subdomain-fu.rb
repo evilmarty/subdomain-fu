@@ -132,6 +132,10 @@ module SubdomainFu
         return self.crazy_rewrite_rule(subdomain, host)
     end
   end
+  
+  def self.current_tld(request)
+    tld_for request.domain
+  end
 
   #This is a black box of crazy!  So I split some of the simpler logic out into the case statement above to make my brain happy!
   def self.crazy_rewrite_rule(subdomain, host)
@@ -140,7 +144,7 @@ module SubdomainFu
   end
 
   def self.current_subdomain(request)
-    subdomain = request.subdomains(SubdomainFu.tld_for(request)).join(".")
+    subdomain = request.subdomains(current_tld(request)).join(".")
     if has_subdomain?(subdomain)
       subdomain
     else
@@ -150,7 +154,7 @@ module SubdomainFu
 
   #Enables subdomain-fu to more completely replace DHH's account_location plugin
   def self.current_domain(request)
-    request.domain(tld_for(request.domain)) + request.port_string
+    request.domain(current_tld(request)) + request.port_string rescue nil
   end
 
   module Controller
